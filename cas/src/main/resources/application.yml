@@ -1,0 +1,28 @@
+server:
+  port: 8080
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        name: CASSESSION
+        domain: localtest.me
+        path: /
+        same-site: Lax
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/cas}
+    username: ${SPRING_DATASOURCE_USERNAME:cas}
+    password: ${SPRING_DATASOURCE_PASSWORD:cas}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
