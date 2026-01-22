@@ -1,0 +1,61 @@
+services:
+  proxy:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - cas
+      - grafana
+      - whoami
+      - prometheus
+    networks: [casnet]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: cas
+      POSTGRES_USER: cas
+      POSTGRES_PASSWORD: cas
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [casnet]
+
+  cas:
+    build: cas
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/cas
+      SPRING_DATASOURCE_USERNAME: cas
+      SPRING_DATASOURCE_PASSWORD: cas
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+      CAS_BASE_DOMAIN: localtest.me
+    depends_on: [postgres]
+    networks: [casnet]
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    networks: [casnet]
+
+  whoami:
+    image: traefik/whoami
+    networks: [casnet]
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks: [casnet]
+
+volumes:
+  pgdata:
+
+networks:
+  casnet:
+    driver: bridge

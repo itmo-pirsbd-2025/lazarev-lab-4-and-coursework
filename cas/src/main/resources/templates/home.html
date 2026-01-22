@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title>CAS — Личный кабинет</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .card { border: 1px solid #ddd; padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+    a.button { display: inline-block; padding: 10px 12px; border: 1px solid #333; border-radius: 10px; text-decoration: none; margin-right: 8px; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>CAS — личный кабинет</h1>
+
+  <div class="card">
+    <div><b>Пользователь:</b> <span th:text="${username}"></span></div>
+    <div class="muted"><b>Роли:</b> <span th:text="${roles}"></span></div>
+    <div style="margin-top:10px;">
+      <a class="button" href="/logout">Выйти</a>
+      <a class="button" href="/admin/services">Админка: сервисы</a>
+      <a class="button" href="/admin/roles">Админка: роли</a>
+      <a class="button" href="/admin/permissions">Админка: права</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Доступные сервисы</h2>
+    <div th:if="${#lists.isEmpty(services)}" class="muted">Нет доступных сервисов</div>
+    <div th:each="s : ${services}" style="margin-bottom: 8px;">
+      <a class="button" th:href="'http://' + ${s.host}" th:text="${s.name}"></a>
+      <span class="muted" th:text="${s.host}"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>OIDC</h2>
+    <div class="muted">
+      Проверка: <a href="/.well-known/openid-configuration">/.well-known/openid-configuration</a>
+    </div>
+  </div>
+</body>
+</html>
