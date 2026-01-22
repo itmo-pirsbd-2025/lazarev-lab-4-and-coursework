@@ -3,7 +3,7 @@
 Проект поднимает локальный “домен” с поддоменами и закрывает доступ к сервисам через единый CAS.
 Доступ к поддоменам возможен только после авторизации и при наличии прав.
 
-Стек: Traefik (ForwardAuth) + Spring Boot + Postgres + Grafana + Prometheus + OIDC (Spring Authorization Server).
+Стек: Nginx (ForwardAuth) + Spring Boot + Postgres + Grafana + Prometheus
 
 ## Домен и поддомены (без hosts)
 Используется `localtest.me` (и `*.localtest.me`), который резолвится в `127.0.0.1`.
@@ -14,22 +14,17 @@
 - http://prom.localtest.me — Prometheus (закрыт CAS)
 
 ## Быстрый старт
-Требуется Docker + Docker Compose.
-
 ```bash
 docker compose up -d --build
 ```
 
-1) Открой http://cas.localtest.me и залогинься  
+1) Открой http://cas.localtest.me
 2) Открой http://grafana.localtest.me — пустит только при наличии прав
 
 ## Демо-пользователи (создаются автоматически)
 - `admin / admin` (роль `ADMIN`)
 - `user / user` (роль `USER`)
 
-Права по умолчанию:
-- `USER` имеет доступ к `grafana.localtest.me`, `whoami.localtest.me`, `prom.localtest.me`
-- `ADMIN` имеет доступ ко всем сервисам
 
 ## Админ-панель
 - http://cas.localtest.me/admin/services — добавить сервис (host)
@@ -37,7 +32,7 @@ docker compose up -d --build
 - http://cas.localtest.me/ — личный кабинет (список доступных сервисов)
 
 ## Как работает защита поддоменов
-Traefik для каждого запроса к защищённому хосту вызывает CAS:
+Nginx для каждого запроса к защищённому хосту вызывает CAS:
 
 `GET http://cas/auth/verify`
 
@@ -55,3 +50,16 @@ Issuer: `http://cas.localtest.me`
 ```bash
 docker compose down -v
 ```
+
+## Профилирование и бенчмарки
+
+### JMH (микробенчмарки)
+Бенчмарки лежат в `cas/src/jmh/java`.
+
+Сборка и запуск:
+```bash
+cd cas
+mvn -q -Pjmh -DskipTests package
+java -jar target/cas-jmh.jar -bm avgt -tu ns -wi 5 -i 10
+```
+
